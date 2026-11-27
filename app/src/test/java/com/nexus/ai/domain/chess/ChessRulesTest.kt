@@ -58,13 +58,11 @@ class ChessRulesTest {
 
     @Test
     fun insufficientMaterial_sameColorBishops_isDraw_oppositeColorIsNot() {
-        // Kedua gajah di kotak terang (c1 dan f4 keduanya (file+rank) ganjil).
-        assertTrue(Rules.insufficientMaterial(fenPosition("8/8/4k3/8/5B2/8/2B1K3/8 w - - 0 1")))
+        // Kedua gajah di kotak yang sama warnanya: c2 dan d3 keduanya (file+rank) ganjil.
+        assertTrue(Rules.insufficientMaterial(fenPosition("8/8/4k3/8/8/3B4/2B1K3/8 w - - 0 1")))
         // Gajah di kotak berbeda warna: skakmat masih mungkin.
-        assertFalse(Rules.insufficientMaterial(fenPosition("8/8/4k3/8/5B2/8/2b1K3/8 w - - 0 1").let { p ->
-            // Ubah satu gajah menjadi gajah lawan di kotak gelap untuk kasus berbeda warna.
-            p
-        }))
+        // f4 (gelap) dan c2 (terang): berbeda warna, skakmat masih mungkin.
+        assertFalse(Rules.insufficientMaterial(fenPosition("8/8/4k3/8/5B2/8/2b1K3/8 w - - 0 1")))
     }
 
     @Test
@@ -78,8 +76,8 @@ class ChessRulesTest {
 
     @Test
     fun checkmate_takesPrecedence_overSeventyFiveMoveRule() {
-        // Skakmat batu tunggal: raja h8 diskak oleh benteng a8? gunakan posisi skakmat sederhana.
-        val pos = fenPosition("7k/5Q2/6K1/8/8/8/8/8 b - - 150 80")
+        // Hitam di h8 diskak Qg7 yang dilindungi Kg6: skakmat, dengan halfmove 150.
+        val pos = fenPosition("7k/6Q1/6K1/8/8/8/8/8 b - - 150 80")
         assertEquals(GameStatus.CHECKMATE, Rules.status(pos))
     }
 
