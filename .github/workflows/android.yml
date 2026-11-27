@@ -1,0 +1,39 @@
+name: Build NEXUS AI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      # Gradle dipasang langsung oleh action ini, jadi tidak perlu gradlew di repositori.
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Siapkan local.properties untuk CI
+        # CI memakai SDK bawaan runner. URL backend di sini hanya placeholder agar build tidak gagal.
+        run: |
+          echo "nexus.backend.url=https://example.invalid/" > local.properties
+
+      - name: Build APK debug
+        run: gradle :app:assembleDebug --no-daemon
+
+      - name: Unggah APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-ai-debug-apk
+          path: app/build/outputs/apk/debug/*.apk

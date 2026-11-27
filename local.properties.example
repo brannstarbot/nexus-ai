@@ -1,0 +1,6 @@
+# Salin file ini menjadi local.properties (jangan di-commit).
+# Android SDK path (diisi otomatis oleh Android Studio):
+sdk.dir=/path/to/Android/Sdk
+
+# URL backend proxy NEXUS AI. Backend-lah yang menyimpan API key AI Router BangunWeb.
+nexus.backend.url=https://YOUR-BACKEND.example.com/
