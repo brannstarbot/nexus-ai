@@ -2,10 +2,20 @@ package com.nexus.ai.domain.chess
 
 import kotlin.math.abs
 
-enum class GameStatus { ONGOING, CHECK, CHECKMATE, STALEMATE, DRAW_FIFTY_MOVES }
+enum class GameStatus {
+    ONGOING, CHECK, CHECKMATE, STALEMATE,
+    /** Remis yang harus diklaim pemain (pengulangan 3x atau aturan 50 langkah). */
+    DRAW_CLAIMED,
+    /** Remis otomatis: posisi terulang 5 kali. */
+    DRAW_REPETITION,
+    /** Remis otomatis: 75 langkah tanpa gerakan pion atau tangkapan. */
+    DRAW_75_MOVES,
+    /** Remis otomatis: materi tidak cukup untuk skakmat. */
+    DRAW_INSUFFICIENT,
+}
 
 fun GameStatus.isOver(): Boolean =
-    this == GameStatus.CHECKMATE || this == GameStatus.STALEMATE || this == GameStatus.DRAW_FIFTY_MOVES
+    this != GameStatus.ONGOING && this != GameStatus.CHECK
 
 /** Aturan catur lengkap: langkah legal, skak, skakmate, stalemate, rokade, en passant, promosi. */
 object Rules {
@@ -34,13 +44,48 @@ object Rules {
         return isAttacked(pos, king, side.opposite)
     }
 
+    /** Status posisi saat ini. Pengulangan posisi dan aturan 50 langkah dicek di ChessGame karena butuh riwayat. */
     fun status(pos: Position): GameStatus {
         val inCheck = isInCheck(pos, pos.sideToMove)
         if (legalMoves(pos).isEmpty()) {
             return if (inCheck) GameStatus.CHECKMATE else GameStatus.STALEMATE
         }
-        if (pos.halfmoveClock >= 100) return GameStatus.DRAW_FIFTY_MOVES
+        if (insufficientMaterial(pos)) return GameStatus.DRAW_INSUFFICIENT
+        if (pos.halfmoveClock >= 150) return GameStatus.DRAW_75_MOVES
         return if (inCheck) GameStatus.CHECK else GameStatus.ONGOING
+    }
+
+    /**
+     * Materi tidak cukup untuk skakmat (FIDE 5.2.2):
+     * hanya raja, raja + satu bidak minor, atau hanya gajah yang semuanya berada di warna kotak yang sama.
+     */
+    fun insufficientMaterial(pos: Position): Boolean {
+        val pieces = pos.board.filterNotNull().filter { it.type != PieceType.KING }
+        if (pieces.any { it.type == PieceType.PAWN || it.type == PieceType.ROOK || it.type == PieceType.QUEEN }) return false
+        if (pieces.size <= 1) return true
+        if (pieces.all { it.type == PieceType.BISHOP }) {
+            val squareColors = pos.board.withIndex()
+                .filter { (_, p) -> p?.type == PieceType.BISHOP }
+                .map { (sq, _) -> (fileOf(sq) + rankOf(sq)) % 2 }
+                .distinct()
+            return squareColors.size == 1
+        }
+        return false
+    }
+
+    /** Kunci untuk membandingkan posisi berulang. En passant hanya dihitung jika benar-benar bisa dilakukan. */
+    data class RepetitionKey(
+        val board: List<Piece?>,
+        val side: Side,
+        val castling: CastlingRights,
+        val enPassant: Int?,
+    )
+
+    fun repetitionKey(pos: Position): RepetitionKey {
+        val ep = pos.enPassantTarget?.takeIf { target ->
+            legalMoves(pos).any { it.isEnPassant && it.to == target }
+        }
+        return RepetitionKey(pos.board, pos.sideToMove, pos.castling, ep)
     }
 
     fun pseudoLegalMoves(pos: Position): List<Move> {

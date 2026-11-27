@@ -122,6 +122,10 @@ class ChessViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
+    fun claimDraw() {
+        _state.update { it.copy(game = it.game.claimDraw(), message = null) }
+    }
+
     fun restart() {
         _state.update { ChessUiState(mode = it.mode) }
     }
