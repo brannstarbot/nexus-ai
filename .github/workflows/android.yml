@@ -28,7 +28,7 @@ jobs:
           echo "nexus.backend.url=https://example.invalid/" > local.properties
 
       - name: Build APK debug
-        run: gradle :app:assembleDebug --no-daemon
+        run: gradle :app:testDebugUnitTest :app:assembleDebug --no-daemon
 
       - name: Unggah APK
         uses: actions/upload-artifact@v4
