@@ -59,3 +59,7 @@ data class Position(
         }
     }
 }
+
+/** Notasi UCI, misalnya "e2e4" atau "e7e8q". Dipakai sebagai cadangan jika SAN tidak tersedia. */
+fun Move.uci(): String =
+    squareName(from) + squareName(to) + (promotion?.symbol?.lowercaseChar()?.toString() ?: "")
