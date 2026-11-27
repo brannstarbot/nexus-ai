@@ -99,3 +99,8 @@ dependencies {
 
     testImplementation(libs.junit)
 }
+
+// Hindari duplikasi kelas org.intellij.lang.annotations dari dua artefak (annotations & annotations-java5).
+configurations.all {
+    exclude(group = "org.jetbrains", module = "annotations-java5")
+}
