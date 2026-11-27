@@ -24,6 +24,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.nexus.ai.di.AppContainer
 import com.nexus.ai.ui.chat.ChatScreen
+import com.nexus.ai.ui.chess.ChessScreen
 import com.nexus.ai.ui.settings.SettingsScreen
 import com.nexus.ai.ui.theme.NexusAccent
 import com.nexus.ai.ui.theme.NexusPrimary
@@ -74,7 +75,7 @@ fun NexusApp(container: AppContainer) {
         ) {
             composable(NexusDestination.Chat.route) { ChatScreen(container) }
             // Chess dan History belum diimplementasikan.
-            composable(NexusDestination.Chess.route) { Box(Modifier.fillMaxSize()) }
+            composable(NexusDestination.Chess.route) { ChessScreen(container) }
             composable(NexusDestination.History.route) { Box(Modifier.fillMaxSize()) }
             composable(NexusDestination.Settings.route) { SettingsScreen(container) }
         }

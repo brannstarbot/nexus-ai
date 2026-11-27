@@ -20,6 +20,8 @@ class AppContainer(private val context: Context) {
 
     val defaultBackendUrl: String = BuildConfig.BACKEND_BASE_URL
 
+    val appContext: Context = context.applicationContext
+
     val apiKeyStore: ApiKeyStore by lazy { ApiKeyStore(context) }
     val settingsStore: AppSettingsStore by lazy { AppSettingsStore(context) }
 
